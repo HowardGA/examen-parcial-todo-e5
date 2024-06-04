@@ -3,28 +3,68 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}{% endblock title %}</title>
+    <title>{% block title %}Lista de Tareas{% endblock title %}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <style>
       body {
         background-color: #f8f9fa;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
       }
       .navbar-brand {
         font-weight: bold;
+        color: #fff !important;
       }
-      .footer {
-        background-color: #343a40;
+      .navbar {
+        background-color: #007bff;
+      }
+      .nav-link {
+        color: #fff !important;
+      }
+      .nav-link.active {
+        font-weight: bold;
+      }
+      .card {
+        margin-bottom: 20px;
+        width: 400px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border: none;
+      }
+      .card-header {
+        background-color: #6c757d;
+        color: white;
+        font-weight: bold;
+      }
+      .btn-edit, .btn-delete {
+        width: 48%;
+      }
+      .btn-edit {
+        margin-right: 4%;
+      }
+      .btn-edit {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #212529;
+      }
+      .btn-edit:hover {
+        background-color: #e0a800;
+        border-color: #d39e00;
+        color: #212529;
+      }
+      .btn-delete {
+        background-color: #dc3545;
+        border-color: #dc3545;
         color: #fff;
-        padding: 20px 0;
       }
-      .footer a {
-        color: #ffc107;
+      .btn-delete:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+        color: #fff;
       }
     </style>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm mb-4">
+    <nav class="navbar navbar-expand-lg shadow-sm mb-4">
       <div class="container">
         <a class="navbar-brand" href="#">Parra's Dev</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,7 +76,7 @@
               <a class="nav-link active" aria-current="page" href="{% url 'home' %}">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Asignar Tarea</a>
+              <a href="{% url 'create_task' %}" class="btn btn-primary">Asignar Tarea</a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
@@ -47,33 +87,31 @@
         </div>
       </div>
     </nav>
-    
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-lg-8 text-center">
-          {% block content %}
-          {% endblock content %}
-        </div>
-      </div>
-    </div>
 
-    <footer class="footer text-center text-lg-start mt-4">
-      <div class="container p-4">
-        <div class="row">
-          <div class="col-lg-6 col-md-12 mb-4 mb-md-0">
-            <h5 class="text-uppercase">Footer Content</h5>
-            <p>
-              Aquí puedes usar filas y columnas para organizar tu contenido de pie de página. 
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-            </p>
+    <div class="container">
+      <h2 class="mb-4 text-center">Lista de Tareas</h2>
+      <div class="row">
+        {% for task in tasks %}
+        <div class="col-12 mb-3">
+          <div class="card">
+            <div class="card-header">
+              {{ task.task_name }}
+            </div>
+            <div class="card-body">
+              <p class="card-text">{{ task.description }}</p>
+              <p class="card-text"><strong>Usuario Asignado:</strong> {{ task.auditor.name }}</p>
+              <p class="card-text"><strong>Aplicación:</strong> {{ task.application.app_name }}</p>
+              <p class="card-text"><strong>Status:</strong> {{ task.status }}</p>
+              <p class="card-text"><strong>Fecha de Creación:</strong> {{ task.due_date }}</p>
+              <div class="d-flex justify-content-between">
+                <a href="{% url 'delete_task' task.id_task %}" class="btn btn-delete">Eliminar</a>
+              </div>
+            </div>
           </div>
         </div>
+        {% endfor %}
       </div>
-      <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
-        © 2024 Copyright:
-        <a class="text-light" href="https://google.com/">Asinador de tareas</a>
-      </div>
-    </footer>
+    </div>
     
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>

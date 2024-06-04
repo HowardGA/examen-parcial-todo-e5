@@ -4,80 +4,58 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from .models import Auditor, Application, Task, OperationLog
 from .forms import AuditorForm, ApplicationForm, TaskForm
 
-# Vista para listar auditores
-class AuditorListView(ListView):
-    model = Auditor
-    template_name = 'base.html'
-    context_object_name = 'auditors'
+def base(request):
+    tasks = Task.objects.select_related('auditor', 'application').all()
+    context = {'tasks': tasks}
+    return render(request, 'base.html', context)
 
-# Vista para crear un auditor
-class AuditorCreateView(CreateView):
-    model = Auditor
-    form_class = AuditorForm
-    template_name = 'auditor_form.html'
-    success_url = reverse_lazy('auditor_list')
 
-# Vista para actualizar un auditor
-class AuditorUpdateView(UpdateView):
-    model = Auditor
-    form_class = AuditorForm
-    template_name = 'auditor_form.html'
-    success_url = reverse_lazy('auditor_list')
+def delete_task(request, id_task):
+    task = Task.objects.get(id_task=id_task)
+    task.delete()
+    return redirect('home')
+from .forms import TaskForm
 
-# Vista para eliminar un auditor
-class AuditorDeleteView(DeleteView):
-    model = Auditor
-    template_name = 'auditor_confirm_delete.html'
-    success_url = reverse_lazy('auditor_list')
+def create_task(request):
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/tasks/')
+    else:
+        form = TaskForm()
+        # Obtener los objetos de auditor y aplicación para pasar al formulario
+        auditors = Auditor.objects.all()
+        applications = Application.objects.all()
+        # Pasar los objetos al formulario
+        form.fields['auditor'].queryset = auditors
+        form.fields['application'].queryset = applications
+    return render(request, 'create_task.html', {'form': form})
 
-# Vista para listar aplicaciones
-class ApplicationListView(ListView):
-    model = Application
-    template_name = 'application_list.html'
-    context_object_name = 'applications'
 
-# Vista para crear una aplicación
-class ApplicationCreateView(CreateView):
-    model = Application
-    form_class = ApplicationForm
-    template_name = 'application_form.html'
-    success_url = reverse_lazy('application_list')
+# Vistas
+def auditor_list(request):
+    auditors = Auditor.objects.all()
+    context = {'auditors': auditors}  # El nombre en el contexto debe ser 'auditors'
+    return render(request, 'create_task.html', context)
 
-# Vista para actualizar una aplicación
-class ApplicationUpdateView(UpdateView):
-    model = Application
-    form_class = ApplicationForm
-    template_name = 'application_form.html'
-    success_url = reverse_lazy('application_list')
 
-# Vista para eliminar una aplicación
-class ApplicationDeleteView(DeleteView):
-    model = Application
-    template_name = 'application_confirm_delete.html'
-    success_url = reverse_lazy('application_list')
+def application_list(request):
+    applications = Application.objects.all()  # Corregir el nombre de la variable
+    context = {'applications': applications}  # El nombre en el contexto debe ser 'applications'
+    return render(request, 'create_task.html', context)
 
-# Vista para listar tareas
-class TaskListView(ListView):
-    model = Task
-    template_name = 'task_list.html'
-    context_object_name = 'tasks'
 
-# Vista para crear una tarea
-class TaskCreateView(CreateView):
-    model = Task
-    form_class = TaskForm
-    template_name = 'task_form.html'
-    success_url = reverse_lazy('task_list')
 
-# Vista para actualizar una tarea
-class TaskUpdateView(UpdateView):
-    model = Task
-    form_class = TaskForm
-    template_name = 'task_form.html'
-    success_url = reverse_lazy('task_list')
-
-# Vista para eliminar una tarea
-class TaskDeleteView(DeleteView):
-    model = Task
-    template_name = 'task_confirm_delete.html'
-    success_url = reverse_lazy('task_list')
+def change_status(request, id_task, nuevo_estado):
+    # Obtener la tarea específica
+    task = Task.objects.get(id_task=id_task)
+    
+    # Verificar si el nuevo estado es válido
+    if nuevo_estado in ['Pendiente', 'Progreso', 'Completado']:
+        # Cambiar el estado de la tarea
+        task.status = nuevo_estado
+        task.save()
+    
+    # Redireccionar a la página de detalle de la tarea
+    return redirect('detalle_tarea', task_id=id_task)
